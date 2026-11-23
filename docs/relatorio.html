@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Relatório — Pong</title>
+<style>
+@page { size: A4; margin: 1.6cm; }
+body { font-family: Arial, sans-serif; color: #18283a; line-height: 1.5; font-size: 10.5pt; }
+h1 { color: #0d1b2a; font-size: 30pt; margin-bottom: 4px; }
+h2 { color: #1d4e6f; border-bottom: 2px solid #ef6f6c; padding-bottom: 4px; margin-top: 24px; }
+h3 { color: #284b63; margin-bottom: 2px; }
+.cover { padding: 58px 0 28px; border-bottom: 6px solid #f4d35e; }
+.subtitle { color: #60798c; font-size: 13pt; }
+.card { background: #edf3f7; border-left: 4px solid #ef6f6c; padding: 10px 14px; margin: 11px 0; }
+.grid { display: flex; gap: 12px; }
+.grid img { width: 48%; border: 1px solid #b7c7d3; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+th, td { border: 1px solid #b7c7d3; padding: 6px; text-align: left; vertical-align: top; }
+th { background: #e6eef3; color: #1d4e6f; }
+code { color: #1d4e6f; background: #edf3f7; padding: 1px 4px; }
+.small { color: #60798c; font-size: 9pt; }
+</style>
+</head>
+<body>
+<section class="cover">
+<h1>Pong — Dupla</h1>
+<p class="subtitle">Relatório do projeto de Programação Orientada a Objetos</p>
+<p><strong>Aplicação:</strong> jogo de raquetes para dois jogadores com Python e PyQt6<br><strong>Objetivo:</strong> rebater a bola e alcançar cinco pontos antes do adversário</p>
+</section>
+
+<h2>1. Introdução e objetivo</h2>
+<p>O Pong é um jogo para dois jogadores em que cada participante controla uma raquete vertical. A bola atravessa a quadra continuamente, rebate nas bordas e muda sua direção horizontal ao tocar uma raquete. Quando a bola ultrapassa um jogador, o adversário recebe um ponto.</p>
+<div class="card"><strong>Decisão de interface:</strong> a aplicação usa uma quadra escura, elementos retangulares, cores amarelo e vermelho para diferenciar os participantes e uma tipografia direta para manter o foco no movimento e no placar.</div>
+
+<h2>2. Funcionamento e regras</h2>
+<ul>
+<li>O jogador 1 movimenta a raquete amarela com as teclas <strong>W</strong> e <strong>S</strong>.</li>
+<li>O jogador 2 movimenta a raquete vermelha com as setas para cima e para baixo.</li>
+<li>A bola se move continuamente enquanto a partida está ativa.</li>
+<li>As bordas superior e inferior invertem a velocidade vertical da bola.</li>
+<li>Uma colisão com uma raquete inverte a velocidade horizontal e altera o ângulo conforme o ponto de contato.</li>
+<li>Quando a bola sai pela lateral, o adversário recebe um ponto e a bola retorna ao centro.</li>
+<li>O primeiro jogador a chegar a cinco pontos vence.</li>
+</ul>
+
+<h2>3. Arquitetura da aplicação</h2>
+<table>
+<tr><th>Classe</th><th>Responsabilidade</th><th>Conceitos aplicados</th></tr>
+<tr><td><code>Ball</code></td><td>Armazena posição, velocidade, raio, movimento e rebatidas.</td><td>Classe, construtor, encapsulamento e métodos de domínio.</td></tr>
+<tr><td><code>Paddle</code></td><td>Controla posição, tamanho, limites e colisão da raquete.</td><td>Atributos privados, propriedades e associação com <code>Ball</code>.</td></tr>
+<tr><td><code>Player</code></td><td>Representa jogador, lado e pontuação.</td><td>Encapsulamento, construtor e métodos de alteração de estado.</td></tr>
+<tr><td><code>PongGame</code></td><td>Coordena regras, estados, colisões, pontos e vencedor.</td><td>Associação entre objetos e separação de responsabilidades.</td></tr>
+<tr><td><code>GameWorker</code></td><td>Executa o laço contínuo do jogo em uma thread dedicada.</td><td>Thread, sincronização, sinais e comunicação entre objetos.</td></tr>
+<tr><td><code>PongBoard</code></td><td>Desenha a quadra, raquetes, bola e indica os controles.</td><td>Herança de <code>QWidget</code> e separação entre domínio e apresentação.</td></tr>
+<tr><td><code>MainWindow</code></td><td>Organiza janela, botões, placar, mensagens e encerramento.</td><td>Composição de objetos Qt e tratamento de eventos.</td></tr>
+</table>
+
+<h2>4. Programação Orientada a Objetos</h2>
+<p>Os objetos do domínio possuem responsabilidades diferentes. <code>Ball</code> não conhece a interface, <code>Paddle</code> não decide o vencedor e <code>MainWindow</code> não calcula colisões. Essa divisão torna o código mais fácil de testar e manter.</p>
+<p>O encapsulamento aparece nas propriedades de posição e pontuação. Os métodos públicos representam ações válidas, como mover uma raquete, iniciar uma partida ou adicionar um ponto. A associação aparece em <code>PongGame</code>, que mantém uma bola, duas raquetes e dois jogadores.</p>
+
+<h2>5. Thread e comunicação com a interface</h2>
+<p>O processamento contínuo é realizado por <code>GameWorker</code>, movido para uma instância de <code>QThread</code>. Seu laço usa o relógio monotônico, limita o intervalo de atualização e executa aproximadamente 60 atualizações por segundo.</p>
+<p>A thread não desenha diretamente na janela. Depois de atualizar o domínio, ela emite um sinal com um <code>GameSnapshot</code>. A interface recebe o sinal na thread principal do Qt e chama <code>update()</code> no widget de desenho. Assim, o processamento da bola não congela a janela e a pintura continua obedecendo ao modelo de eventos do Qt.</p>
+<p>Os comandos de controle utilizam um <code>RLock</code> para proteger o estado compartilhado. O encerramento sinaliza o evento de parada, libera o laço e aguarda a thread terminar antes de fechar o processo.</p>
+
+<h2>6. Capturas de tela</h2>
+<div class="grid"><img src="assets/inicio.png" alt="Quadra do Pong no início da partida"><img src="assets/partida.png" alt="Quadra do Pong com placar atualizado"></div>
+<p class="small">Figura 1 — Quadra, controles e placar. Figura 2 — Partida após marcação de pontos.</p>
+
+<h2>7. Exemplos de uso</h2>
+<div class="card"><strong>Partida:</strong> o usuário clica em <strong>Iniciar Jogo</strong>, controla sua raquete e tenta devolver a bola para o campo adversário.</div>
+<div class="card"><strong>Pausa:</strong> ao clicar em <strong>Pausar Jogo</strong>, o laço deixa de atualizar a bola. O botão permite continuar sem zerar o placar.</div>
+<div class="card"><strong>Reinício:</strong> <strong>Reiniciar Jogo</strong> zera os pontos e reposiciona a bola e as duas raquetes.</div>
+
+<h2>8. Entrega e validação</h2>
+<p>Repositório: <a href="https://github.com/MiguelMartinezUnifesp/pong">github.com/MiguelMartinezUnifesp/pong</a></p>
+<p>O projeto foi executado com <code>uv sync</code> e <code>uv run pong</code>. Foram verificadas a compilação dos módulos, a pontuação, a condição de vitória, os limites das raquetes, a inicialização da janela, a atualização da interface e o encerramento correto da thread.</p>
+<p>O vídeo demonstrativo apresenta a quadra, controles, colisões, pontos, pausa, reinício, classes principais e o uso da thread. A narração foi sintetizada localmente em português brasileiro para fins acadêmicos não comerciais.</p>
+</body>
+</html>
