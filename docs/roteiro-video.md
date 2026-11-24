@@ -13,7 +13,7 @@ Arquivo: `video-demonstrativo.mp4`
 9. Apresentação do placar e da organização em classes.
 10. Explicação da thread de processamento e dos sinais Qt usados na interface.
 
-O vídeo foi gravado com a janela real do aplicativo em resolução 1120 × 780, com aproximadamente 55 segundos e narração em português brasileiro.
+O vídeo foi gravado com a janela real do aplicativo em resolução 1080 × 760, com aproximadamente 55 segundos e narração em português brasileiro.
 
 ## Narração
 
